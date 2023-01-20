@@ -1,0 +1,109 @@
+---
+title: "JMM-Net"
+author: "Yuhao Zhao"
+date: "2022-12-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+my_packages<- c('igraph', 'RColorBrewer', 'ggplot2', 'readr', 'tidyr')
+
+```
+
+Figure out which of these packages is already installed
+
+```{r}
+# Store all installed packages
+ya_installed <- library()$results[,1]
+# Check whether required packages are already installed and grab only those that still need installation
+need_install<-my_packages[!(my_packages %in% ya_installed)]
+#install required packages
+lapply(need_install, install.packages, character.only = TRUE)
+```
+
+Now, load only unloaded packages
+
+```{r}
+# Store all installed packages
+ya_loaded <- (.packages())
+# Check whether required packages are already installed and grab only those that still need installation
+need_load<-my_packages[!(my_packages %in% ya_loaded)]
+# Load required packages
+lapply(need_load, require, character.only = TRUE)
+```
+
+## import data set
+```{r cars}
+fakedisruptdata <- read_csv("fakedisruptdata.csv")
+View(fakedisruptdata)
+```
+
+## data manipulation
+```{r}
+edges_and_themes<- cbind(fakedisruptdata[2],fakedisruptdata[29], fakedisruptdata[28], fakedisruptdata[34], fakedisruptdata[36], fakedisruptdata[38], fakedisruptdata[40], fakedisruptdata[42])
+View(edges_and_themes)
+cleaned_eat<- drop_na(edges_and_themes)
+View(cleaned_eat)
+
+cleaned_eat_so<-cleaned_eat[which(cleaned_eat[,4]==1),1:2]
+View(cleaned_eat_so)
+cleaned_eat_bc<-cleaned_eat[which(cleaned_eat[,5]==1),1:2]
+cleaned_eat_btc<-cleaned_eat[which(cleaned_eat[,6]==1),1:2]
+cleaned_eat_ccim<-cleaned_eat[which(cleaned_eat[,7]==1),1:2]
+cleaned_eat_sjedi<-cleaned_eat[which(cleaned_eat[,8]==1),1:2]
+```
+
+## construct graph objects
+```{r}
+jmm_net.g<-graph_from_data_frame(cleaned_eat[,1:2], directed = FALSE)
+jmm_net_so.g<-graph_from_data_frame(cleaned_eat_so, directed = FALSE)
+jmm_net_bc.g<-graph_from_data_frame(cleaned_eat_bc, directed = FALSE)
+jmm_net_btc.g<-graph_from_data_frame(cleaned_eat_btc, directed = FALSE)
+jmm_net_ccjm.g<-graph_from_data_frame(cleaned_eat_ccim, directed = FALSE)
+jmm_net_sjedi.g<-graph_from_data_frame(cleaned_eat_sjedi, directed = FALSE)
+netlist1<-list(jmm_net.g, jmm_net_so.g, jmm_net_bc.g, jmm_net_btc.g, jmm_net_ccjm.g, jmm_net_sjedi.g)
+```
+
+## basic characters summary
+```{r}
+# Look into the several important characteristics in networks using written function
+summary_net<- function(list){
+  n_size<-list()
+  edge_den<-list()
+  diameters<-list()
+  for(i in list){
+    n_size <- append(n_size, gorder(i))
+    edge_den<- append(edge_den, edge_density(i))
+    diameters<-append(diameters, diameter(i))
+  }
+    sum_table<-cbind(n_size, edge_den, diameters)
+    return(sum_table)
+}
+
+summary_net(netlist1)
+```
+```{r}
+#Download the visualization with width=2000, height=2000
+png(file="jmm_ccjm_test.png", width=2000, height=2000)
+
+# plot the network random_5.g with vertex size=log of degree,  edge curvature=0.2.
+plot(jmm_net_ccjm.g, vertex.label.degree=-pi/2, vertex.label.cex= 2, vertex.label.dist = 1.5, vertex.label.font=3, vertex.size=log(degree(jmm_net_ccjm.g)), main='jmm_ccjm', layout=layout_with_kk)
+
+#close the current plot
+dev.off()
+```
+
+```{r}
+#Download the visualization with width=2000, height=2000
+png(file="jmm_sjedi_test.png", width=2000, height=2000)
+
+# plot the network random_5.g with vertex size=log of degree,  edge curvature=0.2.
+plot(jmm_net_sjedi.g, vertex.label.degree=-pi/2, vertex.label.cex= 2, vertex.label.dist = 1.5, vertex.label.font=3, vertex.size=log(degree(jmm_net_sjedi.g)), main='jmm_sjedi', layout=layout_with_fr)
+
+#close the current plot
+dev.off()
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
