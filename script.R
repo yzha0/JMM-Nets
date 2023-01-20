@@ -3,7 +3,7 @@
 ## https://github.com/cjbarrie/academictwitteR
 
 # Prepare Working Environment ---------------------------------------------
-#install.packages("academictwitteR")         ## Twitter's official package to access the Twitter Academic Research Product Track V2 API Endpoint
+install.packages("academictwitteR")         ## Twitter's official package to access the Twitter Academic Research Product Track V2 API Endpoint
 install.packages("devtools")                ## To use tidytags functions
 devtools::install_github("bretsw/tidytags") ## To use tidytags functions
 
